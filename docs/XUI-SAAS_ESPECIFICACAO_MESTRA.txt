@@ -1,0 +1,183 @@
+====================================================
+XUI-SAAS — ESPECIFICAÇÃO MESTRA OFICIAL
+Versão: 1.0
+Autor: Weslei Anderson
+====================================================
+
+1. VISÃO GERAL DO PRODUTO
+----------------------------------------------------
+O XUI-SAAS é uma plataforma SaaS de automação total
+para provedores IPTV que utilizam XUI-One.
+
+O sistema atua como um “painel mestre” que:
+- Orquestra múltiplas instâncias XUI-One
+- Automatiza vendas, testes, renovações e bloqueios
+- Integra WhatsApp, Telegram, pagamentos e marketing
+- Permite operação 24/7 sem intervenção humana
+
+Objetivo principal:
+➡️ Vender automação e resultados, não apenas software.
+
+----------------------------------------------------
+
+2. PERFIL DE USUÁRIOS
+----------------------------------------------------
+
+2.1 Super Admin (Dono do SaaS)
+- Controle total da plataforma
+- Gerencia clientes SaaS
+- Define planos e limites
+- Visualiza métricas globais
+
+2.2 Cliente SaaS (Master)
+- Possui 1 ou mais XUI-One próprios
+- Conecta seus bancos MariaDB
+- Gerencia clientes finais
+- Usa automações prontas
+
+2.3 Revendedor
+- Vende planos IPTV
+- Possui comissões
+- Visualiza apenas seus clientes
+- Não acessa infraestrutura
+
+----------------------------------------------------
+
+3. ARQUITETURA TÉCNICA
+----------------------------------------------------
+
+Monorepo:
+- backend/api → NestJS
+- frontend/web → Next.js
+- docs → documentação oficial
+
+Backend:
+- NestJS
+- MySQL / MariaDB
+- Prisma (futuro)
+- JWT + RBAC
+- Modular (DDD-lite)
+
+Frontend:
+- Next.js App Router
+- Tailwind
+- Dashboards em tempo real
+- Mobile-first
+
+Infra:
+- Docker / Docker Compose
+- Instalador Ubuntu 24.04 LTS
+- Suporte a VPS e Bare Metal
+
+----------------------------------------------------
+
+4. MÓDULOS DO BACKEND
+----------------------------------------------------
+
+4.1 Auth Module
+- Login JWT
+- Refresh Token
+- Roles e permissões
+- MFA (futuro)
+
+4.2 XUI Module
+- Teste de conexão MariaDB
+- Leitura de clientes ativos
+- Criação de testes
+- Renovação automática
+- Bloqueio / desbloqueio
+- Sincronização de dados
+
+4.3 Automation Module
+- Orquestra eventos
+- Agenda tarefas
+- Dispara bots
+- Processa webhooks
+
+4.4 Payments Module
+- Integração Asaas
+- PIX / Cartão
+- Webhooks
+- Renovação automática
+
+4.5 Notification Module
+- WhatsApp Bot
+- Telegram Bot
+- Templates dinâmicos
+- Campanhas automáticas
+
+4.6 Marketing Module
+- Jogos do dia (API GE)
+- Filmes e séries novos
+- Banners automáticos
+- Vídeos gerados
+
+4.7 Backup Module
+- Backup diário
+- Restore
+- Download
+- Histórico
+
+----------------------------------------------------
+
+5. FRONTEND (DASHBOARDS)
+----------------------------------------------------
+
+- Dashboard geral
+- Receita em tempo real
+- Clientes conectados
+- Status dos XUI-One
+- Alertas e eventos
+- Área do cliente
+- Área do revendedor
+
+----------------------------------------------------
+
+6. AUTOMAÇÕES
+----------------------------------------------------
+
+- Criação automática de instância lógica
+- Geração automática de bots
+- Templates prontos
+- Cliente só conecta WhatsApp / Telegram
+- Sistema começa a operar sozinho
+
+----------------------------------------------------
+
+7. SEGURANÇA
+----------------------------------------------------
+
+- JWT com expiração
+- Secrets via ENV
+- Validação de entrada (DTO)
+- Proteção SSRF
+- Rate limit
+- Logs e auditoria
+
+----------------------------------------------------
+
+8. INSTALADOR (UBUNTU 24.04)
+----------------------------------------------------
+
+Script único que:
+- Instala Docker
+- Configura firewall
+- Sobe containers
+- Cria .env
+- Exibe URL final do painel
+
+----------------------------------------------------
+
+9. DIRETRIZES PARA O CODEX
+----------------------------------------------------
+
+- Sempre seguir esta especificação
+- Nunca criar lógica fora de módulos
+- Priorizar segurança
+- Código limpo e escalável
+- Commits pequenos e claros
+- Sempre explicar decisões técnicas
+
+====================================================
+FIM DA ESPECIFICAÇÃO MESTRA
+====================================================
