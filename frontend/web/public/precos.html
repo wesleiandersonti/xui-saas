@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XUI-SaaS - Planos e Preços</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        
+        .plans {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .plan {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .plan:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+        }
+        
+        .plan.popular::before {
+            content: "MAIS POPULAR";
+            position: absolute;
+            top: 20px;
+            right: -40px;
+            background: #fbbf24;
+            color: #1f2937;
+            padding: 8px 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            transform: rotate(45deg);
+        }
+        
+        .plan-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .plan-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .plan-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .plan-description {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+        
+        .plan-price {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .price {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #1f2937;
+            line-height: 1;
+        }
+        
+        .price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #6b7280;
+        }
+        
+        .price-yearly {
+            font-size: 0.9rem;
+            color: #10b981;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        
+        .features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+        
+        .features li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .features li:last-child {
+            border-bottom: none;
+        }
+        
+        .features li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .features .highlight {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .guarantee {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .guarantee h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+        
+        .guarantee p {
+            font-size: 1.1rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .trial {
+            background: #10b981;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 30px;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .plans {
+                grid-template-columns: 1fr;
+            }
+            
+            .plan {
+                padding: 30px 20px;
+            }
+            
+            .price {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="badge">🚀 XUI-SaaS Enterprise</div>
+            <h1>Escolha seu Plano</h1>
+            <p>Solução completa para gestão de operações XUI-One. Escalone seu negócio com a ferramenta mais completa do mercado.</p>
+        </div>
+        
+        <div class="plans">
+            <!-- Starter Plan -->
+            <div class="plan">
+                <div class="plan-header">
+                    <div class="plan-icon">🥉</div>
+                    <div class="plan-name">Starter</div>
+                    <div class="plan-description">Ideal para iniciar</div>
+                </div>
+                
+                <div class="plan-price">
+                    <div class="price">R$ 97<span>/mês</span></div>
+                    <div class="price-yearly">ou R$ 970/ano (2 meses grátis)</div>
+                </div>
+                
+                <ul class="features">
+                    <li>Até <span class="highlight">100 clientes</span> ativos</li>
+                    <li><span class="highlight">1 instância</span> XUI-One</li>
+                    <li>Pagamentos via PIX e Cartão</li>
+                    <li>WhatsApp (500 mensagens/mês)</li>
+                    <li>Backup diário automático</li>
+                    <li>10 GB storage</li>
+                    <li>Suporte por email</li>
+                </ul>
+                
+                <a href="/register?plan=starter" class="btn btn-secondary">Começar Agora</a>
+            </div>
+            
+            <!-- Professional Plan -->
+            <div class="plan popular">
+                <div class="plan-header">
+                    <div class="plan-icon">🥈</div>
+                    <div class="plan-name">Professional</div>
+                    <div class="plan-description">Para crescer rápido</div>
+                </div>
+                
+                <div class="plan-price">
+                    <div class="price">R$ 297<span>/mês</span></div>
+                    <div class="price-yearly">ou R$ 2.970/ano (2 meses grátis)</div>
+                </div>
+                
+                <ul class="features">
+                    <li>Até <span class="highlight">500 clientes</span> ativos</li>
+                    <li><span class="highlight">3 instâncias</span> XUI-One + failover</li>
+                    <li>Até <span class="highlight">10 revendedores</span></li>
+                    <li>Sistema de comissões completo</li>
+                    <li>Integração TMDB (100 títulos VOD)</li>
+                    <li>Telegram Bot + 1 canal</li>
+                    <li>API REST (1.000 req/dia)</li>
+                    <li>Backup horário</li>
+                    <li>50 GB storage</li>
+                    <li>Suporte WhatsApp prioritário</li>
+                </ul>
+                
+                <a href="/register?plan=professional" class="btn btn-primary">Escolher Professional</a>
+            </div>
+            
+            <!-- Enterprise Plan -->
+            <div class="plan">
+                <div class="plan-header">
+                    <div class="plan-icon">🥇</div>
+                    <div class="plan-name">Enterprise</div>
+                    <div class="plan-description">Para grandes operações</div>
+                </div>
+                
+                <div class="plan-price">
+                    <div class="price">R$ 697<span>/mês</span></div>
+                    <div class="price-yearly">ou R$ 6.970/ano (2 meses grátis)</div>
+                </div>
+                
+                <ul class="features">
+                    <li><span class="highlight">Clientes ilimitados</span></li>
+                    <li><span class="highlight">Instâncias ilimitadas</span></li>
+                    <li><span class="highlight">Revendedores ilimitados</span></li>
+                    <li>White-label (sua marca)</li>
+                    <li>Mobile app próprio (Android/iOS)</li>
+                    <li>VOD TMDB ilimitado</li>
+                    <li>Canais Telegram ilimitados</li>
+                    <li>API ilimitada</li>
+                    <li>CDN Cloudflare Pro</li>
+                    <li>Backup em tempo real</li>
+                    <li>200 GB storage</li>
+                    <li>Suporte 24/7 dedicado</li>
+                    <li>SLA 1h garantido</li>
+                </ul>
+                
+                <a href="/contact?plan=enterprise" class="btn btn-secondary">Falar com Vendas</a>
+            </div>
+        </div>
+        
+        <div class="trial">
+            🎁 <strong>Teste Grátis:</strong> 7 dias no plano Starter. Sem cartão de crédito.
+        </div>
+        
+        <div class="guarantee">
+            <h2>🛡️ Garantia de 30 Dias</h2>
+            <p>Se você não estiver 100% satisfeito, devolvemos todo o seu dinheiro. Sem perguntas, sem burocracia.</p>
+        </div>
+    </div>
+</body>
+</html>
