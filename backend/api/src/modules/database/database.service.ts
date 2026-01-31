@@ -635,5 +635,111 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         KEY idx_system_settings_key (setting_key)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS upsell_analytics (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tenant_id INT NOT NULL,
+        user_id INT NOT NULL,
+        event_type ENUM('view', 'click') NOT NULL,
+        trigger_type VARCHAR(50) NOT NULL,
+        variant VARCHAR(50) NOT NULL,
+        page_url VARCHAR(500) NULL,
+        session_id VARCHAR(255) NULL,
+        clicked_plan_id INT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_upsell_tenant_event (tenant_id, event_type),
+        KEY idx_upsell_trigger_variant (trigger_type, variant),
+        KEY idx_upsell_created (created_at),
+        CONSTRAINT fk_upsell_analytics_tenant FOREIGN KEY (tenant_id)
+          REFERENCES tenants(id) ON DELETE CASCADE,
+        CONSTRAINT fk_upsell_analytics_user FOREIGN KEY (user_id)
+          REFERENCES users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS upsell_conversions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tenant_id INT NOT NULL,
+        user_id INT NOT NULL,
+        from_plan_id INT NOT NULL,
+        to_plan_id INT NOT NULL,
+        amount DECIMAL(10, 2) NOT NULL,
+        converted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_conversions_tenant (tenant_id),
+        KEY idx_converted_at (converted_at),
+        CONSTRAINT fk_upsell_conversions_tenant FOREIGN KEY (tenant_id)
+          REFERENCES tenants(id) ON DELETE CASCADE,
+        CONSTRAINT fk_upsell_conversions_user FOREIGN KEY (user_id)
+          REFERENCES users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS upsell_banner_dismissals (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tenant_id INT NOT NULL,
+        user_id INT NOT NULL,
+        dismissed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_dismissal_tenant_user (tenant_id, user_id),
+        KEY idx_dismissed_at (dismissed_at),
+        CONSTRAINT fk_upsell_dismissals_tenant FOREIGN KEY (tenant_id)
+          REFERENCES tenants(id) ON DELETE CASCADE,
+        CONSTRAINT fk_upsell_dismissals_user FOREIGN KEY (user_id)
+          REFERENCES users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS ab_test_metrics (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        variant VARCHAR(50) NOT NULL,
+        event_type ENUM('view', 'click', 'conversion') NOT NULL,
+        count INT DEFAULT 0,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_variant_event (variant, event_type)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS promotions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        code VARCHAR(50) NOT NULL UNIQUE,
+        discount_percentage DECIMAL(5, 2) NOT NULL,
+        valid_until DATETIME NOT NULL,
+        applicable_plan_id INT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        max_uses INT NULL,
+        uses_count INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_promotions_active (is_active),
+        KEY idx_promotions_valid (valid_until),
+        CONSTRAINT fk_promotions_plan FOREIGN KEY (applicable_plan_id)
+          REFERENCES plans(id) ON DELETE SET NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS subscription_plans (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tenant_id INT NOT NULL,
+        plan_id INT NOT NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'active',
+        billing_cycle VARCHAR(50) NOT NULL DEFAULT 'monthly',
+        started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expires_at TIMESTAMP NULL,
+        auto_renew BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_subscription_tenant (tenant_id),
+        KEY idx_subscription_status (status),
+        KEY idx_subscription_expires (expires_at),
+        CONSTRAINT fk_subscription_tenant FOREIGN KEY (tenant_id)
+          REFERENCES tenants(id) ON DELETE CASCADE,
+        CONSTRAINT fk_subscription_plan FOREIGN KEY (plan_id)
+          REFERENCES plans(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
   }
 }

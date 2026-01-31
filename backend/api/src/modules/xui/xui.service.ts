@@ -28,8 +28,20 @@ export class XuiService {
   private readonly key: Buffer;
 
   constructor(private readonly db: DatabaseService) {
-    const secretKey =
-      process.env.XUI_ENCRYPTION_KEY || 'default-secret-key-32-chars-long!!';
+    const secretKey = process.env.XUI_ENCRYPTION_KEY;
+    if (!secretKey) {
+      throw new Error(
+        'XUI_ENCRYPTION_KEY environment variable is required. ' +
+          'Please set a secure 32-character encryption key in your .env file. ' +
+          'Generate one with: openssl rand -base64 24',
+      );
+    }
+    if (secretKey.length < 32) {
+      throw new Error(
+        'XUI_ENCRYPTION_KEY must be at least 32 characters long. ' +
+          `Current length: ${secretKey.length} characters.`,
+      );
+    }
     this.key = crypto.scryptSync(secretKey, 'salt', 32);
   }
 

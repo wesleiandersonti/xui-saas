@@ -21,6 +21,8 @@ import { MarketingModule } from './modules/marketing/marketing.module';
 import { SellersModule } from './modules/sellers/sellers.module';
 import { BackupsModule } from './modules/backups/backups.module';
 import { HealthModule } from './modules/health/health.module';
+import { TrialsModule } from './modules/trials/trials.module';
+import { UpsellModule } from './modules/upsell/upsell.module';
 
 @Module({
   imports: [
@@ -54,6 +56,8 @@ import { HealthModule } from './modules/health/health.module';
     SellersModule,
     BackupsModule,
     HealthModule,
+    TrialsModule,
+    UpsellModule,
   ],
   controllers: [AppController],
   providers: [
