@@ -12,7 +12,9 @@ export interface ParsedPlaylist {
 }
 
 export function parseM3U(content: string): ParsedPlaylist {
-  const normalized = String(content || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const normalized = String(content || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n');
   const lines = normalized.split('\n');
   const groups = new Map<string, ParsedChannel[]>();
   let invalidCount = 0;
@@ -42,7 +44,8 @@ export function parseM3U(content: string): ParsedPlaylist {
 
     const group = extractAttribute(info, 'group-title') || 'Outros';
     const logo = extractAttribute(info, 'tvg-logo') || '';
-    const name = extractName(info) || extractAttribute(info, 'tvg-name') || 'Sem nome';
+    const name =
+      extractName(info) || extractAttribute(info, 'tvg-name') || 'Sem nome';
 
     const entry: ParsedChannel = {
       name: name.trim() || 'Sem nome',

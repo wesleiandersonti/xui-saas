@@ -1,4 +1,7 @@
-export function parseDurationToSeconds(value: string | number | undefined, fallbackSeconds: number): number {
+export function parseDurationToSeconds(
+  value: string | number | undefined,
+  fallbackSeconds: number,
+): number {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return Math.max(0, Math.floor(value));
   }

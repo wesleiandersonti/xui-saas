@@ -16,7 +16,10 @@ export class PlaylistsService {
     const maxRedirects = this.getNumber(process.env.PLAYLIST_MAX_REDIRECTS, 2);
     const timeoutMs = this.getNumber(process.env.PLAYLIST_TIMEOUT_MS, 20000);
     const maxBytes = this.getNumber(process.env.PLAYLIST_MAX_BYTES, 5_000_000);
-    const maxChannels = this.getNumber(process.env.PLAYLIST_MAX_CHANNELS, 20000);
+    const maxChannels = this.getNumber(
+      process.env.PLAYLIST_MAX_CHANNELS,
+      20000,
+    );
     const userAgent = process.env.PLAYLIST_USER_AGENT || 'VLC/3.0.0-git';
 
     const downloadStartedAt = Date.now();

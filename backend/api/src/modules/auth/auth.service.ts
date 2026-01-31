@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
 import bcrypt from 'bcryptjs';
@@ -7,7 +11,10 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { AuthUser } from './auth.types';
-import { addSecondsToDate, parseDurationToSeconds } from '../../shared/utils/duration';
+import {
+  addSecondsToDate,
+  parseDurationToSeconds,
+} from '../../shared/utils/duration';
 import { PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 
 interface TokenPair {
@@ -53,8 +60,9 @@ export class AuthService {
           [tenantId, dto.email.trim().toLowerCase(), passwordHash, 'admin'],
         );
         userId = userResult.insertId;
-      } catch (error: any) {
-        if (error?.code === 'ER_DUP_ENTRY') {
+      } catch (error: unknown) {
+        const mysqlError = error as { code?: string };
+        if (mysqlError?.code === 'ER_DUP_ENTRY') {
           throw new ConflictException('Email ja cadastrado');
         }
         throw error;
@@ -93,7 +101,10 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais invalidas');
     }
 
-    const matches = await bcrypt.compare(dto.password, user.password_hash as string);
+    const matches = await bcrypt.compare(
+      dto.password,
+      user.password_hash as string,
+    );
 
     if (!matches) {
       throw new UnauthorizedException('Credenciais invalidas');
@@ -110,10 +121,10 @@ export class AuthService {
 
     return {
       user: {
-        id: user.id,
-        tenantId: user.tenant_id,
-        role: user.role,
-        email: user.email,
+        id: user.id as number,
+        tenantId: user.tenant_id as number,
+        role: user.role as string,
+        email: user.email as string,
       },
       ...tokens,
     };
@@ -161,7 +172,10 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token expirado');
     }
 
-    const matches = await bcrypt.compare(dto.refreshToken, tokenRecord.token_hash as string);
+    const matches = await bcrypt.compare(
+      dto.refreshToken,
+      tokenRecord.token_hash as string,
+    );
 
     if (!matches) {
       throw new UnauthorizedException('Refresh token invalido');
@@ -186,9 +200,10 @@ export class AuthService {
     });
 
     const tokens = await this.db.withTransaction(async (conn) => {
-      await conn.query('UPDATE refresh_tokens SET revoked_at = NOW() WHERE id = ?', [
-        tokenRecord.id,
-      ]);
+      await conn.query(
+        'UPDATE refresh_tokens SET revoked_at = NOW() WHERE id = ?',
+        [tokenRecord.id],
+      );
 
       return this.issueTokens(newPayload, conn);
     });
@@ -219,7 +234,12 @@ export class AuthService {
     };
   }
 
-  private buildPayload(user: { id: number; tenantId: number; role: string; email: string }): AuthUser {
+  private buildPayload(user: {
+    id: number;
+    tenantId: number;
+    role: string;
+    email: string;
+  }): AuthUser {
     return {
       sub: user.id,
       tenantId: user.tenantId,
@@ -229,10 +249,13 @@ export class AuthService {
     };
   }
 
-  private async issueTokens(payload: AuthUser, conn?: PoolConnection): Promise<TokenPair> {
+  private async issueTokens(
+    payload: AuthUser,
+    conn?: PoolConnection,
+  ): Promise<TokenPair> {
     const accessPayload: AuthUser = { ...payload, tokenUse: 'access' };
     const accessToken = await this.jwtService.signAsync(accessPayload, {
-      expiresIn: this.accessTtl,
+      expiresIn: parseDurationToSeconds(this.accessTtl, 900),
       audience: this.audience,
       issuer: this.issuer,
     });
@@ -240,12 +263,15 @@ export class AuthService {
     const jti = randomUUID();
     const refreshPayload: AuthUser = { ...payload, tokenUse: 'refresh', jti };
     const refreshToken = await this.jwtService.signAsync(refreshPayload, {
-      expiresIn: this.refreshTtl,
+      expiresIn: parseDurationToSeconds(this.refreshTtl, 604800),
       audience: this.audience,
       issuer: this.issuer,
     });
 
-    const refreshSeconds = parseDurationToSeconds(this.refreshTtl, 60 * 60 * 24 * 7);
+    const refreshSeconds = parseDurationToSeconds(
+      this.refreshTtl,
+      60 * 60 * 24 * 7,
+    );
     const refreshExpiresAt = addSecondsToDate(refreshSeconds);
 
     const refreshHash = await bcrypt.hash(refreshToken, 10);

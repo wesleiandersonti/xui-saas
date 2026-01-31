@@ -1,9 +1,16 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
-import { Request } from 'express';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { PlaylistsService } from './playlists.service';
 import { PlaylistImportDto } from './dto/playlist-import.dto';
 import { Roles } from '../auth/roles.decorator';
-import { AuthUser } from '../auth/auth.types';
+import type { RequestWithUser } from '../../shared/types/request.types';
 
 @Controller('playlist')
 export class PlaylistsController {
@@ -11,20 +18,20 @@ export class PlaylistsController {
 
   @Roles('admin')
   @Post('import')
-  import(@Body() dto: PlaylistImportDto, @Req() req: Request) {
-    const user = req.user as AuthUser;
-    return this.playlistsService.importPlaylist(dto, user);
+  import(@Body() dto: PlaylistImportDto, @Req() req: RequestWithUser) {
+    return this.playlistsService.importPlaylist(dto, req.user);
   }
 
   @Get()
-  list(@Req() req: Request) {
-    const user = req.user as AuthUser;
-    return this.playlistsService.listPlaylists(user);
+  list(@Req() req: RequestWithUser) {
+    return this.playlistsService.listPlaylists(req.user);
   }
 
   @Get(':id/categories')
-  listCategories(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
-    const user = req.user as AuthUser;
-    return this.playlistsService.listCategories(id, user);
+  listCategories(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.playlistsService.listCategories(id, req.user);
   }
 }

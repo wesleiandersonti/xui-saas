@@ -6,7 +6,10 @@ export interface SsrfGuardOptions {
   allowlist?: string[];
 }
 
-export async function assertSafeUrl(rawUrl: string, options: SsrfGuardOptions = {}): Promise<URL> {
+export async function assertSafeUrl(
+  rawUrl: string,
+  options: SsrfGuardOptions = {},
+): Promise<URL> {
   let parsed: URL;
 
   try {
@@ -39,7 +42,10 @@ export async function assertSafeUrl(rawUrl: string, options: SsrfGuardOptions = 
   return parsed;
 }
 
-export function isHostnameAllowed(hostname: string, allowlist: string[]): boolean {
+export function isHostnameAllowed(
+  hostname: string,
+  allowlist: string[],
+): boolean {
   const normalized = normalizeHostname(hostname);
 
   return allowlist.some((entry) => {
@@ -66,11 +72,18 @@ export function isPrivateIp(address: string): boolean {
 }
 
 function normalizeHostname(hostname: string): string {
-  return String(hostname || '').trim().replace(/\.$/, '').toLowerCase();
+  return String(hostname || '')
+    .trim()
+    .replace(/\.$/, '')
+    .toLowerCase();
 }
 
 function isLocalHostname(hostname: string): boolean {
-  return hostname === 'localhost' || hostname.endsWith('.localhost') || hostname.endsWith('.local');
+  return (
+    hostname === 'localhost' ||
+    hostname.endsWith('.localhost') ||
+    hostname.endsWith('.local')
+  );
 }
 
 async function assertPublicHostname(hostname: string): Promise<void> {
@@ -81,7 +94,7 @@ async function assertPublicHostname(hostname: string): Promise<void> {
     return;
   }
 
-  let records: dns.LookupAddress[];
+  let records: Array<{ address: string; family: number }>;
 
   try {
     records = await dns.lookup(hostname, { all: true });
@@ -103,7 +116,10 @@ async function assertPublicHostname(hostname: string): Promise<void> {
 function isPrivateIpv4(address: string): boolean {
   const parts = address.split('.').map((part) => Number(part));
 
-  if (parts.length !== 4 || parts.some((part) => Number.isNaN(part) || part < 0 || part > 255)) {
+  if (
+    parts.length !== 4 ||
+    parts.some((part) => Number.isNaN(part) || part < 0 || part > 255)
+  ) {
     return true;
   }
 
