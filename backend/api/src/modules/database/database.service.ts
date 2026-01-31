@@ -11,6 +11,22 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly pool: Pool;
 
   constructor() {
+    // Security warning for production
+    if (process.env.NODE_ENV === 'production') {
+      if (!process.env.DB_PASSWORD) {
+        throw new Error(
+          'DB_PASSWORD is required in production environment. ' +
+            'Empty database passwords are not allowed in production.',
+        );
+      }
+      if (process.env.DB_USER === 'root') {
+        console.warn(
+          'WARNING: Using root database user in production is not recommended. ' +
+            'Create a dedicated application user with limited privileges.',
+        );
+      }
+    }
+
     this.pool = mysql.createPool({
       host: process.env.DB_HOST || 'localhost',
       port: Number(process.env.DB_PORT || '3306'),
@@ -571,6 +587,39 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         KEY idx_backups_status (status),
         CONSTRAINT fk_backups_tenant FOREIGN KEY (tenant_id)
           REFERENCES tenants(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS trials (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tenant_id INT NOT NULL,
+        user_id INT NOT NULL,
+        plan_id INT NOT NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'active',
+        started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expires_at TIMESTAMP NOT NULL,
+        converted_to_paid BOOLEAN DEFAULT FALSE,
+        converted_at TIMESTAMP NULL,
+        payment_id INT NULL,
+        reminder_sent_3days BOOLEAN DEFAULT FALSE,
+        reminder_sent_1day BOOLEAN DEFAULT FALSE,
+        reminder_sent_expired BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_trial_tenant_user (tenant_id, user_id),
+        KEY idx_trials_tenant (tenant_id),
+        KEY idx_trials_user (user_id),
+        KEY idx_trials_status (status),
+        KEY idx_trials_expires (expires_at),
+        CONSTRAINT fk_trials_tenant FOREIGN KEY (tenant_id)
+          REFERENCES tenants(id) ON DELETE CASCADE,
+        CONSTRAINT fk_trials_user FOREIGN KEY (user_id)
+          REFERENCES users(id) ON DELETE CASCADE,
+        CONSTRAINT fk_trials_plan FOREIGN KEY (plan_id)
+          REFERENCES plans(id) ON DELETE CASCADE,
+        CONSTRAINT fk_trials_payment FOREIGN KEY (payment_id)
+          REFERENCES payments(id) ON DELETE SET NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
